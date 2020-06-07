@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+    <script src="https://www.chartjs.org/dist/2.9.3/Chart.min.js"></script>
+	<script src="https://www.chartjs.org/samples/latest/utils.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="">
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
+
+    <title>Display</title>
+    <style>
+      
+      canvas{
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+      }
+      #righty{
+        float:right;
+      }
+      #heading{
+        margin: auto;
+        margin-top: 0px;
+        margin-bottom: 0px;
+        font-size: 30px;
+        padding:0%;
+        border:0px;
+      }
+    </style>
+  </head>
+  
+  <%  
+    if(data.length){%>
+      <body>
+        <!--making dictonary from the recieved data.-->
+        <% 
+            var len = data.length;
+            uni = [];
+            var i;
+            for (i = 0; i < len; i++) {
+              var dp = data[i];
+              var flag = 0;
+              var leng = uni.length;
+    
+              var j;
+              for (j = 0; j < leng; j++) {
+                var temp_obj = uni[j];
+                if((dp.latitude == temp_obj.lat) && (dp.longitude == temp_obj.lng) ){
+                    uni[j].arr.push(dp.level);
+                    flag = 1;
+                    break;
+                }
+              }
+              
+              if(flag == 0){
+                var new_obj = {};
+                new_obj.lat = dp.latitude;
+                new_obj.lng = dp.longitude;
+                new_obj.arr = [];
+                new_obj.arr.push(dp.level);
+    
+                uni.push(new_obj);
+              }
+    
+            }
+        %> 
+        <!-- In making -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+          <a class="navbar-brand linker-cust" id="left" href="../">Dashboard</a>
+          <a class="navbar-brand linker-cust" id="heading" href="../">Map</a>
+          <a class="navbar-brand linker-cust" id="righty" href="/dataForm">Add Data</a>
+        </nav>
+    
+        <div id="mapid" style="width: 100%; height: 100vh; position: relative;" class="leaflet-container leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag" tabindex="0"></div>
+        
+        <script>
+         
+         var mymap = L.map('mapid').setView([<%=uni[0].lat%>, <%=uni[0].lng%>], 13);
+            
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+          maxZoom: 18,
+          attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+                        '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+                        'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+          id: 'mapbox/streets-v11',
+          tileSize: 512,
+          zoomOffset: -1,
+          accessToken: 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+        }).addTo(mymap);
+        
+          
+        // adding thinhgs for customized markers
+        var LeafIcon = L.Icon.extend({
+            options: {
+                iconSize:     [30, 30],
+                iconAnchor:   [22, 94],
+                popupAnchor:  [-3, -76]
+            }
+        });
+
+        var fullIcon = new LeafIcon({iconUrl: 'images/full.jpg'}),
+            mediumIcon = new LeafIcon({iconUrl: 'images/medium.jpg'}),
+            emptyIcon = new LeafIcon({iconUrl: 'images/empty.jpg'});
+
+
+
+         <%   
+          var m;
+          for(m = 0;m < uni.length; m++){ %>
+
+            var final_icon;
+            if(<%=uni[m].arr[0]%> <= 20){
+              final_icon = emptyIcon;
+            }
+            if((<%=uni[m].arr[0]%> > 20) && (<%=uni[m].arr[0]%> < 80)){
+              final_icon = mediumIcon;
+            }
+            if(<%=uni[m].arr[0]%> >= 80){
+              final_icon = fullIcon;
+            }
+
+            var marker = L.marker([<%=uni[m].lat%>, <%=uni[m].lng%>], {icon: final_icon}).addTo(mymap);
+            marker.bindPopup(`
+              <div class="container">
+                  <div class="row" id="row1">
+                      <div class="row">
+                        <ul>
+                          <li><b>Latitude : </b><span id="lat`+ <%=uni[m].lat.toString()%>+<%=uni[m].lng.toString()%> +`"></span></li>
+                          <li><b>Longitude : </b><span id="lng`+ <%=uni[m].lat.toString()%>+<%=uni[m].lng.toString()%> +`"></span></li>
+                          <li><b>Level : </b><span id="level`+ <%=uni[m].lat.toString()%>+<%=uni[m].lng.toString()%> +`""></span></li>
+                        </ul>
+                      </div>
+                      <div class="row">
+                          <canvas id="canvas`+ <%=uni[m].lat.toString()%>+<%=uni[m].lng.toString()%> +`"></canvas>
+                      </div>
+                  </div>
+              </div>
+            `);
+    
+            function onMapClick(e) {
+              console.log(e.latlng);
+              fill_lat_lng(e.latlng.lat, e.latlng.lng)
+            }
+    
+            marker.on('click', onMapClick);
+          <%}%>
+    
+            // filling the latitude and longitude of the clicked marker
+          function fill_lat_lng(lat, lng){
+            <% 
+              var n;
+              for(n = 0; n<uni.length; n++){%>
+                if((lat == <%=uni[n].lat%>) && (lng == <%=uni[n].lng%>)){
+                  document.getElementById("lat"+ <%=uni[n].lat.toString()%>+<%=uni[n].lng.toString()%>).innerHTML = <%=uni[n].lat%>;
+                  document.getElementById("lng"+ <%=uni[n].lat.toString()%>+<%=uni[n].lng.toString()%>).innerHTML = <%=uni[n].lng%>;
+                  document.getElementById("level"+ <%=uni[n].lat.toString()%>+<%=uni[n].lng.toString()%>).innerHTML = <%=uni[n].arr[0]%>;
+                  brr = []
+                  <%
+                    var p;
+                    for(p=0; p<uni[n].arr.length; p++){
+                      %>
+                        brr.push(<%=uni[n].arr[p]%>);
+                      <%
+                    }
+                  %>
+                  graph(brr,lat,lng);
+                }  
+              <%}
+            %>
+          }
+    
+          function graph(levels,lati,long){
+            if(window.myLine)
+              window.myLine.destroy();
+            var y_label = [];
+            var q;
+            for(q=0;q<levels.length;q++){
+              y_label.push((q*4).toString());
+            }
+            var config = {
+              type: 'line',
+              data: {
+                labels: y_label,
+                datasets: [{
+                  label: 'Level : ',
+                  backgroundColor: window.chartColors.red,
+                  borderColor: window.chartColors.red,
+                  data: levels,
+                  fill: false,
+                }]
+              },
+              options: {
+                responsive: true,
+                title: {
+                  display: false,
+                  text: 'Levels Line Chart'
+                },
+                tooltips: {
+                  mode: 'index',
+                  intersect: false,
+                },
+                hover: {
+                  mode: 'nearest',
+                  intersect: true
+                },
+                scales: {
+                  xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                      display: true,
+                      labelString: 'Hours Ago'
+                    }
+                  }],
+                  yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                      display: true,
+                      labelString: 'Level'
+                    }
+                  }]
+                }
+              }
+            };
+    
+            var ctx = document.getElementById('canvas'+lati.toString()+long.toString()).getContext('2d');
+            window.myLine = new Chart(ctx, config);
+    
+          }
+    
+         </script>
+    
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+      </body>
+  <%}
+    else{%>
+      
+      <body>
+        <h3>You have no data to be displayed</h3>
+        <a href="./dataForm"><button class="btn-primary" >Add Data</button></a>
+      </body>
+    <%}
+  %>
+  
+</html>
