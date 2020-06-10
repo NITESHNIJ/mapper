@@ -3,28 +3,35 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const dataSchema = new Schema({
-    xyz:{
-        type: String
-    },
     latitude: {
         type: String,
-        required: true,
-        unique: false
+        required: true
     },
     longitude: {
         type: String,
-        required: true,
-        unique: false
+        required: true
     },
     level: {
-        type: String,
-        required: true,
-        unique: false
+        type: Array
+    },
+    temprature: {
+        type: Array
+    },
+    alert: {
+        type: Boolean,
+        default: false
     },
     userid: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
+    },
+    high: {
+        type: String
+    },
+    low: {
+        type: String
     }
+
 },{
     timestamps: true
 });

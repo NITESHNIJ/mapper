@@ -11,33 +11,79 @@
 
     <title>Sign-up Page</title>
     <style>
+      #righty{
+        float:right;
+      }
+      #heading{
+        margin: auto;
+        margin-top: 0px;
+        margin-bottom: 0px;
+        font-size: 30px;
+        padding:0%;
+        border:0px;
+      }
+      .container{
+        	margin-top: 15px;
+      }
     </style>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <a class="navbar-brand linker-cust" id="lefty" href="../">Dashboard</a>
-      <a class="navbar-brand linker-cust" id="righty" href="map">View Map</a>
+      <a class="navbar-brand linker-cust" id="left" href="../">Dashboard</a>
+      <a class="navbar-brand linker-cust" id="heading" href="#">Alert</a>
+      <a class="navbar-brand linker-cust" id="righty" href="/dataForm">Add Data</a>
     </nav>
+
+    <%
+      if(status == 'failed'){%>
+        <li>Failed to add data!</li>
+      <%}
+      else
+        if(status == 'passed'){%>
+        <li>Added succesfully!</li>
+      <%}  
+    %>
     
     <div class="container">
-      <!-- <div class="card card-primary">
+      <%
+        if(data.length){
+      %>
+
+      <div class="card card-primary">
         <div class="card-header">
-          <h3 class="card-title">Add Data...</h3>
+          <h3 class="card-title">Create Alert...</h3>
         </div>
-        <form role="form" method="POST" action="data">
+        <form role="form" method="POST" action="create_alert">
           <div class="card-body">
             <div class="form-group">
-              <label for="latitude">Latitude</label>
-              <input type="text" class="form-control" id="latitude" placeholder="Enter Latitude" name="latitude">
+              
+            <%
+              var i;
+              for (i = 0; i < data.length; i++) {
+                str = data[i].latitude.toString() + "_" + data[i].longitude.toString();
+                if(data[i].alert == false){
+                %>
+                <div class="checkbox">
+                  <label><input type="checkbox"  name="check" value=<%=str%> > Lat: <%=data[i].latitude%> &nbsp  Lng: <%=data[i].longitude%> &nbsp  Name: xyz</label>
+                </div>
+              <%}
+              else{%>
+                <div class="checkbox">
+                  <label><input type="checkbox"  name="check" checked disabled value=<%=str%> > Lat: <%=data[i].latitude%> &nbsp  Lng: <%=data[i].longitude%> &nbsp  Name: xyz</label>
+                </div>
+              <%}
+              }
+            %>
+
             </div>
             <div class="form-group">
-              <label for="longitude">Longitude</label>
-              <input type="text" class="form-control" id="longitude" placeholder="Enter Longitude" name="longitude">
+              <label for="high">Level Upper Limit</label>
+              <input type="text" class="form-control" id="high" placeholder="Enter Upper Limit" name="high" required>
             </div>
             <div class="form-group">
-                <label for="level">Level</label>
-                <input type="text" class="form-control" id="level" placeholder="Enter Level" name="level">
-              </div>
+              <label for="low">Level Lower Limit</label>
+              <input type="text" class="form-control" id="low" placeholder="Enter Lower Limit" name="low" required>
+            </div>
           </div>
           
 
@@ -45,8 +91,25 @@
             <button type="submit" class="btn btn-primary">Submit</button>
           </div>
         </form>
-      </div> -->
-      Shit is about to get real!
+      </div>
+      <%
+        }
+        else
+          if(status == 'failed'){
+      %>
+        <div class="container" id="blank_page">
+          <h3><p class="text-center">Server Error, Please try later...</p></h3>
+        </div>
+      <%
+        }
+        else{%>
+          <div class="container" id="blank_page">
+            <h3><p class="text-center">You have no data to create an alert on!</p></h3>
+            <p class="text-center"><a href="./dataForm"><button class="btn-primary" >Add Data</button></a></p>
+          </div>
+        <%}
+      %>
+            
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

@@ -21,24 +21,60 @@ alertRouter.route('/')
             }
             else{
                 res.statusCode = 200;
-                res.render('create_alert.html',{data: datas});
+                res.render('create_alert.html',{data: datas, status: 'not-tried'});
             }
         })
     })
     .post(authenticate.verifyUser, (req,res,next) => {
         req.body.userid = req.user._id;
-        Data.create(req.body)
-        .then((data) => {
-            res.render('data_form.html',{status:'added'});
-        },(err) => {
-            res.render('data_form.html',{status:'failed'});
-        })
-        .catch((err) => {
-            res.render('data_form.html',{status:'failed'});
-        });
+        check = req.body.check;
+        if((typeof check) != Object)
+            check = [check];
+        var i;
+        for(i=0;i<check.length;i++){
+            var latlng = check[i].split('_');
+            var lat = latlng[0];
+            var lng = latlng[1];
+            console.log("lat : " + lat + " Lng : " + lng);
+
+            Data.findOne({latitude : lat, longitude : lng, userid : req.user._id})
+            .then((data) => {
+                data.alert = true;
+                data.high = req.body.high;
+                data.low = req.body.low;
+                data.save()
+                .then((data)=>{
+                    
+                },(err) => {
+                    console.log(err);
+                    res.render('create_alert.html',{status:'failed', data: []});
+                });
+            
+            },(err) => {
+                console.log(err);
+                res.render('create_alert.html',{status:'failed', data: []});
+            })
+            .catch((err) => {
+                console.log(err);
+                res.render('create_alert.html',{status:'failed', data: []});
+            });
+
+        }
+        if(i == check.length){
+            Data.find({userid : req.user._id})
+            .sort({'createdAt': 'desc'})
+            .exec(function(err, datas) {
+                if(err){
+                    console.log(err);
+                    next(err);
+                }
+                else{
+                    res.statusCode = 200;
+                    //res.render('create_alert.html',{data: datas, status: 'passed'});
+                    res.redirect('/create_alert');
+                }
+            })
+        }
     });
 
 module.exports = alertRouter;
-
-
-
