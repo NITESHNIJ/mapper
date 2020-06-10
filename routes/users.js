@@ -29,14 +29,16 @@ router.post('/signup', (req, res, next) => {
         passport.authenticate('local')(req, res, () => {
 
           let transporter = nodemailer.createTransport({
-            service: "gmail",
+            host: 'smtp.mail.yahoo.com',
+            port: 465,
+            service:'yahoo',
+            secure: false,
             auth: {
-              user: "niteshnijhawan99@gmail.com",
-              pass: "nitesh@123",
+               user: "niteshnij@yahoo.com",
+               pass: "gurmeet@123"
             },
-            tls: {
-                rejectUnauthorized: false,
-              },
+            debug: false,
+            logger: true
           });
             
           let info = transporter.sendMail({
@@ -44,6 +46,10 @@ router.post('/signup', (req, res, next) => {
             to: req.user.username,
             subject: "Test Email",
             html:"You are registered !"
+          },(err)=>{
+            if(err){
+              console.log(err);
+            }
           });
             
           res.render('login.ejs',{signedup : 'passed', loggedin: "not-tried", error:''});

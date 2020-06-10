@@ -127,14 +127,12 @@ dataRouter.route('/')
                                 str = "Level underflow the lower limit for tank = Lat:" + data.latitude + " Lng: " + data.longitude;
 
                             let transporter = nodemailer.createTransport({
-                                service: "gmail",
+                                host: "smtp.mailtrap.io",
+                                port: 2525,
                                 auth: {
-                                  user: "niteshnijhawan99@gmail.com",
-                                  pass: "nitesh@123",
+                                  user: "8719037746dfd3",
+                                  pass: "17fb5449b5864d"
                                 },
-                                tls: {
-                                    rejectUnauthorized: false,
-                                  },
                               });
                                 
                               let info = transporter.sendMail({
