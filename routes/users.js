@@ -53,7 +53,7 @@ router.post('/signup', (req, res, next) => {
           //   }
           // });
 
-          send_mail.send_mail(req.user.username,"Testing123","shit is about to get real");
+          send_mail.send_mail(req.user.username,"Signed Up!","You have been succesfully signed up");
             
           res.render('login.ejs',{signedup : 'passed', loggedin: "not-tried", error:''});
         });
