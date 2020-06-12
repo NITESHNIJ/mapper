@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 var User = require('../models/user');
 var passport = require('passport');
 
+var send_mail = require('./mail');
+
 var authenticate = require('../authenticate');
 const nodemailer = require("nodemailer");
 
@@ -28,29 +30,30 @@ router.post('/signup', (req, res, next) => {
       else{
         passport.authenticate('local')(req, res, () => {
 
-          let transporter = nodemailer.createTransport({
-            host: 'smtp.mail.yahoo.com',
-            port: 465,
-            service:'yahoo',
-            secure: false,
-            auth: {
-               user: "niteshnij@yahoo.com",
-               pass: "gurmeet@123"
-            },
-            debug: false,
-            logger: true
-          });
+          // let transporter = nodemailer.createTransport({
+          //   host: 'in-v3.mailjet.com',
+          //   port: 587,
+          //   secure: false,
+          //   auth: {
+          //      user: "95f1ac58d3f2730bda0e000b9e4032f0",
+          //      pass: "ea71f3d8ffa48b2ebc4396c0b55263b6"
+          //   },
+          //   debug: false,
+          //   logger: true
+          // });
             
-          let info = transporter.sendMail({
-            from: '"nitesh" <niteshnijhawan99@gmail.com>', // sender address
-            to: req.user.username,
-            subject: "Test Email",
-            html:"You are registered !"
-          },(err)=>{
-            if(err){
-              console.log(err);
-            }
-          });
+          // let info = transporter.sendMail({
+          //   from: '"nitesh" <95f1ac58d3f2730bda0e000b9e4032f0>', // sender address
+          //   to: req.user.username,
+          //   subject: "Test Email",
+          //   html:"You are registered !"
+          // },(err)=>{
+          //   if(err){
+          //     console.log(err);
+          //   }
+          // });
+
+          send_mail.send_mail(req.user.username,"Testing123","shit is about to get real");
             
           res.render('login.ejs',{signedup : 'passed', loggedin: "not-tried", error:''});
         });
