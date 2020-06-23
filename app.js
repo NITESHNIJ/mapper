@@ -5,6 +5,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+var cors = require('cors');
+
 var session = require('express-session');
 var FileStore = require('session-file-store')(session);
 
@@ -20,6 +22,7 @@ var dataFormRouter = require('./routes/dataFormRouter');
 var mapRouter = require('./routes/mapRouter');
 var logoutRouter = require('./routes/logoutRouter');
 var alertRouter = require('./routes/alertRouter');
+var downloadRouter = require('./routes/downloadRouter');
 
 // creating connection to the database mongo server and schemas.
 const mongoose = require('mongoose');
@@ -36,7 +39,6 @@ connect.then((db) => {
 
 var app = express();
 
-
 app.engine('html',require('ejs').renderFile);
 app.set('view engine', 'ejs'); 
 
@@ -44,6 +46,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -72,6 +75,7 @@ app.use('/dataForm', dataFormRouter);
 app.use('/map', mapRouter);
 app.use('/logout', logoutRouter);
 app.use('/create_alert', alertRouter);
+app.use('/download', downloadRouter);
 
 app.use(express.static(path.join(__dirname, 'public')));
 

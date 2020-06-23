@@ -49,21 +49,6 @@ dataRouter.route('/')
                             else
                                 str = "Level underflow the lower limit for tank = Lat:" + data.latitude + " Lng: " + data.longitude;
 
-                            // let transporter = nodemailer.createTransport({
-                            //     host: "smtp.mailtrap.io",
-                            //     port: 2525,
-                            //     auth: {
-                            //       user: "8719037746dfd3",
-                            //       pass: "17fb5449b5864d"
-                            //     },
-                            //   });
-                                
-                            //   let info = transporter.sendMail({
-                            //     from: '"nitesh" <niteshnijhawan99@gmail.com>', // sender address
-                            //     to: req.user.username,
-                            //     subject: "Test Email",
-                            //     html: str
-                            //   });
                             send_mail.send_mail(req.user.username,"Alert",str);
                         }
                     }
