@@ -28,7 +28,7 @@ router.post('/',(req, res, next) => {
             .then((data) => {
                 res.setHeader('Content-Type','application/json');
                 res.statusCode = 200;
-                send_mail.send_mail(req.body.username,"Change Password","https://5ef3879ebab7e0381b74f52a--loving-beaver-54e03f.netlify.app/reset_password/"+key);
+                send_mail.send_mail(req.body.username,"Change Password","https://loving-beaver-54e03f.netlify.app/reset_password/"+key);
                 res.json({message : 'Link has been sent to your Mail ID. Please go to it to change the password'});
             },(err) => {
                 res.setHeader('Content-Type','application/json');
