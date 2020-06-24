@@ -23,6 +23,8 @@ var mapRouter = require('./routes/mapRouter');
 var logoutRouter = require('./routes/logoutRouter');
 var alertRouter = require('./routes/alertRouter');
 var downloadRouter = require('./routes/downloadRouter');
+var forgotpasswordRouter = require('./routes/forgotpasswordRouter');
+var resetpasswordRouter = require('./routes/resetpasswordRouter');
 
 // creating connection to the database mongo server and schemas.
 const mongoose = require('mongoose');
@@ -76,6 +78,8 @@ app.use('/map', mapRouter);
 app.use('/logout', logoutRouter);
 app.use('/create_alert', alertRouter);
 app.use('/download', downloadRouter);
+app.use('/forgotpassword', forgotpasswordRouter);
+app.use('/resetpassword', resetpasswordRouter);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
