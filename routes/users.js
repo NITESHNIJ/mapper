@@ -13,32 +13,19 @@ var router = express.Router();
 router.use(bodyParser.json());
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
-
-router.get('/signup', (req, res, next) => {
-  res.render('signup.ejs',{signedup:'not-tried',error:''});
-});
-
-// router.post('/signup', (req, res, next) => {
-//   User.register(new User({username: req.body.username}),
-//     req.body.password, (err,user) => {
-//       if(err){
-//         res.render('signup.ejs',{signedup : 'failed', error: err});
-//       }
-//       else{
-//         passport.authenticate('local')(req, res, () => {
-//           send_mail.send_mail(req.user.username,"Signed Up!","You have been succesfully signed up");
-            
-//           res.render('login.ejs',{signedup : 'passed', loggedin: "not-tried", error:''});
-//         });
-//       }
-//   });
-// });
 
 router.post('/signup', (req, res, next) => {
-  User.register({username: req.body.username},
+  User.register({
+    username: req.body.username,
+    name: req.body.name,
+    companyname: req.body.companyname,
+    usertype: req.body.usertype,
+    typeofdatabase: req.body.typeofdatabase,
+    userpic: req.body.userpic,
+    companylogo: req.body.companylogo,
+    parentid: req.body.parentid
+
+  },
     req.body.password, (err,user) => {
       console.log('ran');
       if(err){
@@ -56,25 +43,6 @@ router.post('/signup', (req, res, next) => {
       }
   });
 });
-
-router.get('/login', (req, res, next) => {
-  res.render('login.ejs',{signedup : 'not-tried', loggedin:'not-tried', error:''});
-});
-
-// router.post('/login',(req, res, next) => {
-//   passport.authenticate('local', function(err, user, info) {
-//     if (err) { res.render('login.ejs',{signedup : 'not-tried', loggedin:'failed', error:err}); }
-//     if (!user) { res.render('login.ejs',{signedup : 'not-tried', loggedin:'failed', error:'Something went wrong, please try again'}); }
-//     req.logIn(user, function(err) {
-//       if (err) { res.render('login.ejs',{signedup : 'not-tried', loggedin:'failed', error:err}); }
-//       var token = authenticate.getToken({_id: req.user._id});
-//       res.cookie('token',token.toString(),{maxAge: 3600000, signed: true});
-//       //res.render('login.ejs',{signedup : 'no-tried', loggedin: "passed", error:''});
-//       res.redirect('/');
-//     });
-//   })(req, res, next);
-// });
-
 
 router.post('/login',(req, res, next) => {
     passport.authenticate('local', function(err, user, info) {
@@ -96,11 +64,57 @@ router.post('/login',(req, res, next) => {
         var token = authenticate.getToken({_id: req.user._id});
         console.log("logged in with token : " + token);
         res.statusCode = 200;
-        res.json({token : token, message: "logged in succesfully!"});
+        res.json({
+          token : token, 
+          message: "logged in succesfully!"
+        });
       });
     })(req, res, next);
   });
 
+
+router.get('/detail',authenticate.verifyUser, (req,res,next) => {
+  res.setHeader('Content-Type','application/json');
+  res.statusCode = 200;
+  res.json({ 
+    name: req.user.name,
+    companyname: req.user.companyname,
+    usertype: req.user.usertype,
+    typeofdatabase: req.user.typeofdatabase,
+    userpic: req.user.userpic,
+    companylogo: req.user.companylogo,
+    parentid: req.user.parentid
+  });
+});
+
+router.post('/localuser/signup',authenticate.verifyUser, (req,res,next) => {
+  User.register({
+    username: req.body.username,
+    name: req.body.name,
+    companyname: req.user.companyname,
+    usertype: req.body.usertype,
+    typeofdatabase: req.user.typeofdatabase,
+    userpic: req.body.userpic,
+    companylogo: req.user.companylogo,
+    parentid: req.user._id
+
+  },
+    req.body.password, (err,user) => {
+      console.log('ran');
+      if(err){
+        res.status(401).send(err);
+      }
+      else{
+        passport.authenticate('local')(req, res, () => {
+          send_mail.send_mail(req.user.username,"Signed Up!","You have been succesfully signed up");
+            
+          res.statusCode = 200;
+          res.setHeader('Content-Type','application/json');
+          res.json({message : 'Signup Succesful'});
+        });
+      }
+  });
+});
 
 module.exports = router;
 

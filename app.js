@@ -25,6 +25,7 @@ var alertRouter = require('./routes/alertRouter');
 var downloadRouter = require('./routes/downloadRouter');
 var forgotpasswordRouter = require('./routes/forgotpasswordRouter');
 var resetpasswordRouter = require('./routes/resetpasswordRouter');
+var locationRouter = require('./routes/locationRouter');
 
 // creating connection to the database mongo server and schemas.
 const mongoose = require('mongoose');
@@ -58,28 +59,21 @@ app.use(passport.initialize());
 var cookieParser = require('cookie-parser');
 app.use(cookieParser('12345-67890-09876-54321'));
 
-function auth(req,res,next){
-    console.log(req.signedCookies);
-    if(req.signedCookies.token){
-      req.headers['authorization'] = `Bearer ${req.signedCookies.token}`;
-    }
-    next();
-  }
-  
-app.use(auth);
 
-
-
+// General ( For all kind of users ): 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/data', dataRouter);
-app.use('/dataForm', dataFormRouter);
-app.use('/map', mapRouter);
 app.use('/logout', logoutRouter);
-app.use('/create_alert', alertRouter);
-app.use('/download', downloadRouter);
 app.use('/forgotpassword', forgotpasswordRouter);
 app.use('/resetpassword', resetpasswordRouter);
+
+// For admin user (Company owner) : 
+// app.use('/data', dataRouter);
+// app.use('/dataForm', dataFormRouter);
+// app.use('/map', mapRouter);
+// app.use('/create_alert', alertRouter);
+// app.use('/download', downloadRouter);
+app.use('/location',locationRouter);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
