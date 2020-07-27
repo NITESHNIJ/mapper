@@ -4,29 +4,27 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const mongoose = require('mongoose');
-const Location = require('../models/location');
+const Sensor = require('../models/sensor');
 var passport = require('passport');
 
-const locationRouter = express.Router();
+const sensorRouter = express.Router();
 
-locationRouter.use(bodyParser.json());
+sensorRouter.use(bodyParser.json());
 
 // {userid : req.user._id}
-locationRouter.route('/')
+sensorRouter.route('/')
     .post(authenticate.verifyUser, (req,res,next) => {
         console.log(".post reached");
         req.body.userid = req.user._id;
-        Location.create({
-            userid: req.user._id,
-            latitude: req.body.latitude,
-            longitude: req.body.longitude,
-            name: req.body.name
-        })
+        req.body.descrete_values = req.body.descrete_values.split(/\s+/);
+        Sensor.create(
+            req.body
+        )
         .then((data) => {
             console.log(".then reached");
             res.statusCode = 200;
             res.setHeader('Content-Type','application/json');
-            res.json({message : 'Location added succesfully'});
+            res.json({message : 'Sensor added succesfully'});
         },
         (err) => {
             console.log("err reached");
@@ -43,7 +41,7 @@ locationRouter.route('/')
     })
     .get(authenticate.verifyUser, (req,res,next) => {
         console.log(".get reached");
-        Location.find({userid : req.user._id})
+        Sensor.find({userid : req.user._id})
         .then((data) => {
             console.log(".then reached");
             res.statusCode = 200;
@@ -63,7 +61,7 @@ locationRouter.route('/')
         });
     });
 
-module.exports = locationRouter;
+module.exports = sensorRouter;
 
 
 

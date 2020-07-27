@@ -26,6 +26,7 @@ var downloadRouter = require('./routes/downloadRouter');
 var forgotpasswordRouter = require('./routes/forgotpasswordRouter');
 var resetpasswordRouter = require('./routes/resetpasswordRouter');
 var locationRouter = require('./routes/locationRouter');
+var sensorRouter = require('./routes/sensorRouter');
 
 // creating connection to the database mongo server and schemas.
 const mongoose = require('mongoose');
@@ -74,6 +75,7 @@ app.use('/resetpassword', resetpasswordRouter);
 // app.use('/create_alert', alertRouter);
 // app.use('/download', downloadRouter);
 app.use('/location',locationRouter);
+app.use('/sensor',sensorRouter);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
