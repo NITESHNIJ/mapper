@@ -14,49 +14,42 @@ locationRouter.use(bodyParser.json());
 // {userid : req.user._id}
 locationRouter.route('/')
     .post(authenticate.verifyUser, (req,res,next) => {
-        console.log(".post reached");
         req.body.userid = req.user._id;
         Location.create({
             userid: req.user._id,
             latitude: req.body.latitude,
             longitude: req.body.longitude,
-            name: req.body.name
+            name: req.body.name,
+            type: req.body.type
         })
         .then((data) => {
-            console.log(".then reached");
             res.statusCode = 200;
             res.setHeader('Content-Type','application/json');
             res.json({message : 'Location added succesfully'});
         },
         (err) => {
-            console.log("err reached");
             res.statusCode = 400;
             res.setHeader('Content-Type','application/json');
             res.json({message : 'Database Error'});
         })
         .catch((error) => {
-            console.log("error reached");
             res.statusCode = 400;
             res.setHeader('Content-Type','application/json');
             res.json({message : 'Server Error'});
         });
     })
     .get(authenticate.verifyUser, (req,res,next) => {
-        console.log(".get reached");
         Location.find({userid : req.user._id})
         .then((data) => {
-            console.log(".then reached");
             res.statusCode = 200;
             res.setHeader('Content-Type','application/json');
             res.json({message : 'Sensor added succesfully', data : data});
         },(err) => {
-            console.log("err reached");
             res.statusCode = 400;
             res.setHeader('Content-Type','application/json');
             res.json({message : 'Database Error'});
         })
         .catch((err) => {
-            console.log("error reached");
             res.statusCode = 400;
             res.setHeader('Content-Type','application/json');
             res.json({message : 'Server Error'});

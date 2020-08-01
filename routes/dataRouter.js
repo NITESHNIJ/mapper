@@ -1,4 +1,3 @@
-
 var authenticate = require('../authenticate');
 const nodemailer = require("nodemailer");
 
@@ -9,87 +8,158 @@ const bodyParser = require('body-parser');
 
 const mongoose = require('mongoose');
 const Data = require('../models/data');
+const Location = require('../models/location');
+const SensorInst = require('../models/sensor_instance');
+const Sensor = require('../models/sensor');
 var passport = require('passport');
 
 const dataRouter = express.Router();
 
 dataRouter.use(bodyParser.json());
 
-// {userid : req.user._id}
-dataRouter.route('/')
-    .get(authenticate.verifyUser, (req,res,next) => {
-        Data.find({userid : req.user._id})
-        .sort({'createdAt': 'desc'})
-        .exec(function(err, datas) {
-            if(err){
-                next(err);
-            }
-            else{
-                res.statusCode = 200;
-                res.render('tester2.html',{data: datas});
-            }
-        })
+function sensor_info(sensorid){
+    return Sensor.find({
+        _id: sensorid
     })
-    .post(authenticate.verifyUser, (req,res,next) => {
-        req.body.userid = req.user._id;
-        Data.findOne({latitude : req.body.latitude, longitude : req.body.longitude, userid : req.user._id})
-        .then((data) => {
-            if(data != null){
-                data.level.unshift(req.body.level);
-                data.temprature.unshift(req.body.temprature);
-                data.save()
-                .then((data)=>{
+    .then((sensor) => {
+        return sensor;
+    },
+    (error) => {
+        return {};
+    })
+    .catch((error) => {
+        return {};
+    });
+}
 
-                    if(data.alert == true){
-                        if( req.body.level >= data.high  ||  req.body.level <= data.low ){
-                            // send mail
-                            var str = "";
-                            if(req.body.level >= data.high)
-                                str = "Level overflow the upper limit for tank = Lat:" + data.latitude + " Lng: " + data.longitude;
-                            else
-                                str = "Level underflow the lower limit for tank = Lat:" + data.latitude + " Lng: " + data.longitude;
+function trial(sensorinstid,sensorid){
+    obj = {};
+    return Data.find({sensorinstid: sensorinstid})
+    .sort({'createdAt': 'desc'})
+    .then(async (datas) => {
+        if(datas.length != 0){
+            console.log("datas : " + datas);
+            // obj = {};
+            obj.sensorinstid = sensorinstid;
+            obj.readings = [];
+            var j;
+            for(j=0;j<datas.length;j++)
+                obj.readings.push(datas[j].reading);
+            obj.sensor = await sensor_info(sensorid);
+            return obj;
+        }
+        else
+            return {};
+    },
+    (error) => {
+        return {};
+    })
+    .catch((error) => {
+        return {};
+    });
+}
 
-                            send_mail.send_mail(req.user.username,"Alert",str);
-                        }
-                    }
-
-                    res.render('data_form.html',{status:'added'});
-                },(err) => res.render('data_form.html',{status:'failed'}));
-            }
-            else{
-                let temp = req.body.temprature;
-                let lev = req.body.level;
-                req.body.temprature = [temp];
-                req.body.level = [lev];
-                Data.create(req.body)
-                .then((data) => {
-                    res.render('data_form.html',{status:'added'});
-                },(err) => {
-                    res.render('data_form.html',{status:'failed'});
-                })
-                .catch((err) => {
-                    res.render('data_form.html',{status:'failed'});
-                });
-            }
-        },(err) => {
-            res.render('data_form.html',{status:'failed'});
+dataRouter.route('/:locationid')
+    .get(authenticate.verifyUser, (req,res,next) => {
+        userid = req.user._id;
+        locationid = req.params.locationid;
+        console.log("userid : " + userid + " locationid : " + locationid);
+        
+        SensorInst.find({
+            userid: userid,
+            locationid: locationid
         })
-        .catch((err) => {
-            res.render('data_form.html',{status:'failed'});
+        .then( async (instances) => {
+            console.log("instances : ");
+            console.log(instances);
+            var i;
+            ret = [];
+            console.log("Oop Begins ------------------------------");
+            for(i=0;i<instances.length;i++){
+                sensorinstid = instances[i]._id;
+                sensorid = instances[i].sensorid;
+                console.log("sensorinst : " + sensorinstid);
+                obj = await trial(sensorinstid,sensorid);
+                ret.push(obj);
+            }
+            if(i == instances.length){
+                res.statusCode = 200;
+                res.setHeader('Content-Type','application/json');
+                res.json({ret:ret});
+            }
+        },
+        (error) => {
+            res.status(404).send(error);
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        });
+
+    });
+dataRouter.route('/').post((req,res,next) => {
+        var locationid = req.body.locationid;
+        Location.find({
+            _id : locationid
+        })
+        .then((location) => {
+            var userid = location[0].userid;
+
+            SensorInst.find({
+                userid: userid,
+                locationid: locationid
+            })
+            .then((instances) => {
+                console.log("userid : " + userid + " locationid : " + locationid);
+                var i;
+                var ids = [];
+                var readings = [];
+                for(i=0;i<instances.length;i++){
+                    sensorinstid = instances[i]._id;
+                    ids.push(sensorinstid);
+                    reading = req.body[sensorinstid];
+                    readings.push(reading);
+
+                    Data.create({
+                        sensorinstid: sensorinstid,
+                        reading: reading
+                    })
+                    .then(() => {
+
+                    },
+                    (error) => {
+                        res.status(404).send(error);
+                    })
+                    .catch((error) => {
+                        res.status(404).send(error);
+                    });
+                }
+                if(i == instances.length){
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type','application/json');
+                    res.json({message:'success'});
+                }
+            },
+            (error) => {
+                res.status(404).send(error);
+            })
+            .catch((error) => {
+                res.status(404).send(error);
+            });
+        },
+        (error) => {
+            res.status(404).send(error);
+        })
+        .catch((error) => {
+            res.status(404).send(error);
         });
     })
-    .put(authenticate.verifyUser, (req,res,next) => {
+    .put((req,res,next) => {
         res.statusCode = 403;
         res.end('PUT operation not supported on /data');
     })
-    .delete(authenticate.verifyUser, (req,res,next) => {
-        Data.remove({userid : req.user._id})
-        .then((resp) => {
-            res.statusCode = 200;
-            res.setHeader('Content-Type','application/json');
-            res.json(resp);
-        },(err) => next(err))
-        .catch((err) => next(err));
+    .delete((req,res,next) => {
+        res.statusCode = 403;
+        res.end('DELETE operation not supported on /data');
     });
 
 module.exports = dataRouter;

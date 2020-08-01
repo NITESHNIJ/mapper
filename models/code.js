@@ -1,13 +1,12 @@
-
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const dataSchema = new Schema({
-    sensorinstid: {
+const codeSchema = new Schema({
+    locationid: {
         type: String,
         required: true
     },
-    reading: {
+    code: {
         type: String,
         required: true
     }
@@ -15,7 +14,7 @@ const dataSchema = new Schema({
     timestamps: true
 });
 
-var Data = mongoose.model('Data',dataSchema);
+var Code = mongoose.model('Code',codeSchema);
 
-module.exports = Data;
+module.exports = Code;
 

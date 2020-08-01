@@ -18,15 +18,15 @@ var config = require('./config');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var dataRouter = require('./routes/dataRouter');
-var dataFormRouter = require('./routes/dataFormRouter');
 var mapRouter = require('./routes/mapRouter');
 var logoutRouter = require('./routes/logoutRouter');
 var alertRouter = require('./routes/alertRouter');
-var downloadRouter = require('./routes/downloadRouter');
 var forgotpasswordRouter = require('./routes/forgotpasswordRouter');
 var resetpasswordRouter = require('./routes/resetpasswordRouter');
 var locationRouter = require('./routes/locationRouter');
 var sensorRouter = require('./routes/sensorRouter');
+var sensorinstRouter = require('./routes/sensorinstRouter');
+var codeRouter = require('./routes/codeRouter');
 
 // creating connection to the database mongo server and schemas.
 const mongoose = require('mongoose');
@@ -69,13 +69,15 @@ app.use('/forgotpassword', forgotpasswordRouter);
 app.use('/resetpassword', resetpasswordRouter);
 
 // For admin user (Company owner) : 
-// app.use('/data', dataRouter);
+app.use('/data', dataRouter);
 // app.use('/dataForm', dataFormRouter);
 // app.use('/map', mapRouter);
 // app.use('/create_alert', alertRouter);
 // app.use('/download', downloadRouter);
 app.use('/location',locationRouter);
 app.use('/sensor',sensorRouter);
+app.use('/sensorinst',sensorinstRouter);
+app.use('/code',codeRouter);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
