@@ -39,7 +39,13 @@ locationRouter.route('/')
         });
     })
     .get(authenticate.verifyUser, (req,res,next) => {
-        Location.find({userid : req.user._id})
+        var userid;
+        if(req.user.usertype == 'admin')
+            userid = req.user._id;
+        else
+            userid = req.user.parentid;
+
+        Location.find({userid : userid})
         .then((data) => {
             res.statusCode = 200;
             res.setHeader('Content-Type','application/json');

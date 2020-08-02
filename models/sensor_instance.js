@@ -14,6 +14,9 @@ const sensorinstSchema = new Schema({
     sensorid: {
         type: String,
         required: true
+    },
+    alert_users:{
+        type: Array
     }
 },{
     timestamps: true

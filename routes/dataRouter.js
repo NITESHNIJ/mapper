@@ -61,7 +61,11 @@ function trial(sensorinstid,sensorid){
 
 dataRouter.route('/:locationid')
     .get(authenticate.verifyUser, (req,res,next) => {
-        userid = req.user._id;
+        var userid;
+        if(req.user.usertype == 'admin')
+            userid = req.user._id;
+        else
+            userid = req.user.parentid;
         locationid = req.params.locationid;
         console.log("userid : " + userid + " locationid : " + locationid);
         

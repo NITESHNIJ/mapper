@@ -72,7 +72,7 @@ app.use('/resetpassword', resetpasswordRouter);
 app.use('/data', dataRouter);
 // app.use('/dataForm', dataFormRouter);
 // app.use('/map', mapRouter);
-// app.use('/create_alert', alertRouter);
+app.use('/alert', alertRouter);
 // app.use('/download', downloadRouter);
 app.use('/location',locationRouter);
 app.use('/sensor',sensorRouter);

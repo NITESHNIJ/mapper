@@ -4,77 +4,149 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const mongoose = require('mongoose');
-const Data = require('../models/data');
+const Location = require('../models/location');
+const SensorInst = require('../models/sensor_instance');
+const Sensor = require('../models/sensor');
 var passport = require('passport');
 
 const alertRouter = express.Router();
 
 alertRouter.use(bodyParser.json());
 
+
+function eachInstance(instance,userid){
+    var inst = {};
+    inst.sensorinstid = instance._id;
+    inst.checked = false;
+
+    console.log("reached");
+    var k;
+    for(k=0;k<instance.alert_users.length;k++){
+        console.log("stored : " + instance.alert_users[k] + " == userid : "+ userid);
+        console.log("stored : " + typeof instance.alert_users[k] + " == userid : "+ typeof userid);
+        if( JSON.stringify(instance.alert_users[k]) === JSON.stringify(userid) ){
+            console.log("matched");
+            inst.checked = true;
+        }
+    }
+
+    return Sensor.find({
+        _id: instance.sensorid
+    })
+    .then((sensors) => {
+        inst.sensorname = sensors[0].name;
+        inst.sensor_type = sensors[0].sensor_type;
+        inst.data_type = sensors[0].data_type;
+        return inst;
+    },
+    (error) => {
+        return {};
+    })
+    .catch((error) => {
+        return {};
+    });
+    
+}
+
+async function eachLocation(location,userid){
+    var loc = {};
+    loc.name = location.name;
+    loc.latitude = location.latitude;
+    loc.longitude = location.longitude;
+    loc.sensinst = [];
+
+    return SensorInst.find({
+        locationid : location._id
+    })
+    .then( async (instances) => {
+        var instance = {};
+        var j;
+        for(j=0;j<instances.length;j++){
+            instance = await eachInstance(instances[j],userid);
+            loc.sensinst.push(instance);
+        }
+        return loc;
+    },
+    (error) => {
+        return {};
+    })
+    .catch((error) => {
+        return {};
+    });
+
+}
+
+
+
 alertRouter.route('/')
-    .get(authenticate.verifyUser, (req,res,next) => {
-        Data.find({userid : req.user._id})
-        .sort({'createdAt': 'desc'})
-        .exec(function(err, datas) {
-            if(err){
-                next(err);
-            }
-            else{
-                res.statusCode = 200;
-                res.render('create_alert.html',{data: datas, status: 'not-tried'});
-            }
+    .get(authenticate.verifyUser,(req,res,next) => {
+
+        var keyuserid;
+        var userid = req.user._id;
+        if(req.user.usertype == 'admin')
+            keyuserid = req.user._id;
+        else
+            keyuserid = req.user.parentid;
+
+        Location.find({
+            userid: keyuserid
         })
+        .then( async (locations) => {
+            var i;
+            var global = [];
+            for(i=0;i<locations.length;i++){
+                var local = {};
+                local = await eachLocation(locations[i],req.user._id);
+                global.push(local);
+            }
+            res.statusCode = 200;
+            res.setHeader('Content-Type','application/json');
+            res.json({locations:global});
+        },
+        (error) => {
+            res.statusCode = 403;
+            res.end('POST operation not supported on /alert');
+        })
+        .catch((error) => {
+            res.statusCode = 403;
+            res.end('POST operation not supported on /alert');
+        });
+        
     })
     .post(authenticate.verifyUser, (req,res,next) => {
-        req.body.userid = req.user._id;
-        check = req.body.check;
-        if((typeof check) != Object)
-            check = [check];
         var i;
+        var check = req.body.selected;
+        console.log("check--");
+        console.log(check);
         for(i=0;i<check.length;i++){
-            var latlng = check[i].split('_');
-            var lat = latlng[0];
-            var lng = latlng[1];
-            console.log("lat : " + lat + " Lng : " + lng);
-
-            Data.findOne({latitude : lat, longitude : lng, userid : req.user._id})
-            .then((data) => {
-                data.alert = true;
-                data.high = req.body.high;
-                data.low = req.body.low;
-                data.save()
-                .then((data)=>{
+            console.log("locationid : " + check[i]);
+            SensorInst.findOne({
+                _id: check[i]
+            })
+            .then((instance) => {
+                var id = req.user._id;
+                instance.alert_users.push(id);
+                instance.save()
+                .then((instance)=>{
                     
                 },(err) => {
-                    console.log(err);
-                    res.render('create_alert.html',{status:'failed', data: []});
+                    res.status(404).send(error);
+                })
+                .catch((error) => {
+                    res.status(404).send(error);
                 });
             
             },(err) => {
-                console.log(err);
-                res.render('create_alert.html',{status:'failed', data: []});
+                res.status(404).send(err);
             })
             .catch((err) => {
-                console.log(err);
-                res.render('create_alert.html',{status:'failed', data: []});
+                res.status(404).send(err);
             });
-
         }
-        if(i == check.length){
-            Data.find({userid : req.user._id})
-            .sort({'createdAt': 'desc'})
-            .exec(function(err, datas) {
-                if(err){
-                    console.log(err);
-                    next(err);
-                }
-                else{
-                    res.statusCode = 200;
-                    //res.render('create_alert.html',{data: datas, status: 'passed'});
-                    res.redirect('/create_alert');
-                }
-            })
-        }
+        res.statusCode = 200;
+        res.setHeader('Content-Type','application/json');
+        res.json({message:'Created Alert Succesfully!'});
+        
     });
 
 module.exports = alertRouter;

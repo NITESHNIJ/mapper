@@ -137,21 +137,25 @@ async function sensorinst(locationid){
 
 async function mapEachSensorInst(instances,locationid){
     var i;
-    var global = '{ "locationid" : "' + locationid + '",  ';
+    var global = '{<br>"locationid" : "' + locationid + '",';
     for(i=0;i<instances.length;i++){
-        var local = await fillInst(instances[i]);
-
-        if(i == (instances.length-1))
-            global = global + local + " ";
+        var local;
+        if(i==(instances.length-1))
+            local = await fillInst(instances[i],true);
         else
-            global = global + local + ", ";
+            local = await fillInst(instances[i],false);
+        global = global + "<br>" + local;
     }
-    global+=" }";
+    global+="<br>}";
     return global;
 }
 
-function fillInst(instance){
-    var info = '"' + instance._id + '" :  "[value here]" //';
+function fillInst(instance,flag){
+    var info;
+    if(flag)
+        info = '"' + instance._id + '" :  "[value here]" //';
+    else
+        info = '"' + instance._id + '" :  "[value here]", //';
     var sensorid = instance.sensorid;
 
     return Sensor.find({
