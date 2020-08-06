@@ -38,8 +38,6 @@ function trial(sensorinstid,sensorid){
     .sort({'createdAt': 'desc'})
     .then(async (datas) => {
         if(datas.length != 0){
-            console.log("datas : " + datas);
-            // obj = {};
             obj.sensorinstid = sensorinstid;
             obj.readings = [];
             var j;
@@ -67,22 +65,17 @@ dataRouter.route('/:locationid')
         else
             userid = req.user.parentid;
         locationid = req.params.locationid;
-        console.log("userid : " + userid + " locationid : " + locationid);
         
         SensorInst.find({
             userid: userid,
             locationid: locationid
         })
         .then( async (instances) => {
-            console.log("instances : ");
-            console.log(instances);
             var i;
             ret = [];
-            console.log("Oop Begins ------------------------------");
             for(i=0;i<instances.length;i++){
                 sensorinstid = instances[i]._id;
                 sensorid = instances[i].sensorid;
-                console.log("sensorinst : " + sensorinstid);
                 obj = await trial(sensorinstid,sensorid);
                 ret.push(obj);
             }
@@ -112,17 +105,13 @@ dataRouter.route('/').post((req,res,next) => {
                 userid: userid,
                 locationid: locationid
             })
-            .then((instances) => {
-                console.log("userid : " + userid + " locationid : " + locationid);
+            .then(async (instances) => {
                 var i;
-                var ids = [];
-                var readings = [];
                 for(i=0;i<instances.length;i++){
-                    sensorinstid = instances[i]._id;
-                    ids.push(sensorinstid);
-                    reading = req.body[sensorinstid];
-                    readings.push(reading);
+                    var sensorinstid = instances[i]._id;
+                    var reading = req.body[sensorinstid];
 
+                    var val = await func(reading, instances[i]);
                     Data.create({
                         sensorinstid: sensorinstid,
                         reading: reading
@@ -166,7 +155,64 @@ dataRouter.route('/').post((req,res,next) => {
         res.end('DELETE operation not supported on /data');
     });
 
+
+
+function func(reading, instance){
+    if(reading != "null" && reading){
+        if(instance.alert_users.length>=1){
+            Sensor.find({
+                _id: instance.sensorid
+            })
+            .then((sensors) => {
+                var sensor = sensors[0];
+                if(sensor.data_type == 'continous'){
+                    if(reading<sensor.min_range || reading>sensor.max_range){
+                        var m;
+                        for(m=0;m<instance.alert_users.length;m++){
+                            var chooser = instance.alert_users[m];
+                            
+                            send_mail.send_mail(
+                                chooser,
+                                "Alert",
+                                "Your sensor ( ID : " + instance.sensorid + " ) has given a value : " + reading + " which violating the valid limits"
+                            );
+                        }
+                    }
+                }
+                else{
+                    var flag = true;
+                    var k = 0;
+                    for(k=0;k<sensor.descrete_values.length;k++){
+                        if(sensor.descrete_values[k] == reading){
+                            flag = false;
+                        }
+                    }
+                    if(flag){
+                        var j;
+                        for(j=0;j<instance.alert_users.length;j++){
+                            var user = instance.alert_users[j];
+                            send_mail.send_mail(
+                                user,
+                                "Alert",
+                                "Your sensor ( ID : " + instance.sensorid + " ) has given a value : " + reading + " which is not among the provided descreate values!"
+                            );
+                        }
+                    }
+                }
+                return;
+            },
+            (error) => {
+                return error;
+            })
+            .catch((error) => {
+                return error;
+            });               
+        }
+        else
+            return;
+    }
+    else
+        return;
+}
+
 module.exports = dataRouter;
-
-
-

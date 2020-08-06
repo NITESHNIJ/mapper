@@ -4,29 +4,29 @@ const OAuth2 = google.auth.OAuth2;
 
 exports.send_mail = (reciever,subject,html) => {
     const oauth2Client = new OAuth2(
-        "486193421840-5jrlk91ea8pa9mmqec8isfbmfunj1sa9.apps.googleusercontent.com", // ClientID
-        "I0F3uEqfTo3tUGFofy4V_gOE", // Client Secret
+        "860836230484-8v186r03m65jg5660lnn33nju6m7jbnq.apps.googleusercontent.com", // ClientID
+        "8v3iui62AD_ckMmZTEhzBzFZ", // Client Secret
         "https://developers.google.com/oauthplayground" // Redirect URL
    );
 
    oauth2Client.setCredentials({
-        refresh_token: "1//04DgpNyJGpMPLCgYIARAAGAQSNwF-L9IrpFHjYUexEOx5aEwXDbIf0U_Sr-cSWn6QR_wuCMkg9LCoyXEEirI6QTGp1_gsYIiKjS8"
+        refresh_token: "1//04ci2qE_5hSpGCgYIARAAGAQSNwF-L9IrDFYY0TcKFHP-9wFzn4MFVbTvW5N6eN-EtyKeqz7Hog0lhA8bk-a21_-tHmBupoVr-dU"
     });
     const accessToken = oauth2Client.getAccessToken();
     let transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
             type: "OAuth2",
-            user: "niteshnijhawan99@gmail.com", 
-            clientId: "486193421840-5jrlk91ea8pa9mmqec8isfbmfunj1sa9.apps.googleusercontent.com",
-            clientSecret: "I0F3uEqfTo3tUGFofy4V_gOE",
-            refreshToken: "1//04DgpNyJGpMPLCgYIARAAGAQSNwF-L9IrpFHjYUexEOx5aEwXDbIf0U_Sr-cSWn6QR_wuCMkg9LCoyXEEirI6QTGp1_gsYIiKjS8",
+            user: "niteshnijhawan100@gmail.com", 
+            clientId: "860836230484-8v186r03m65jg5660lnn33nju6m7jbnq.apps.googleusercontent.com",
+            clientSecret: "8v3iui62AD_ckMmZTEhzBzFZ",
+            refreshToken: "1//04ci2qE_5hSpGCgYIARAAGAQSNwF-L9IrDFYY0TcKFHP-9wFzn4MFVbTvW5N6eN-EtyKeqz7Hog0lhA8bk-a21_-tHmBupoVr-dU",
             accessToken: accessToken
         }
     });
     
     const mailOptions = {
-        from: "niteshnijhawan99@gmail.com",
+        from: "niteshnijhawan100@gmail.com",
         to: reciever,
         subject: subject,
         generateTextFromHTML: true,

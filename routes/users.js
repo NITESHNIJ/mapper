@@ -8,9 +8,22 @@ var send_mail = require('./mail');
 var authenticate = require('../authenticate');
 const nodemailer = require("nodemailer");
 
+var multer = require('multer');
+
 var router = express.Router();
 
 router.use(bodyParser.json());
+
+var companylogoStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/images/companylogo')
+  },
+  filename: function (req, file, cb) {
+    cb(null, 'anything_for_now' )
+  }
+});
+var companylogoUpload = multer({ storage: companylogoStorage }).single('companylogo');
+
 
 /* GET users listing. */
 
@@ -22,9 +35,7 @@ router.post('/signup', (req, res, next) => {
     usertype: req.body.usertype,
     typeofdatabase: req.body.typeofdatabase,
     userpic: req.body.userpic,
-    companylogo: req.body.companylogo,
     parentid: req.body.parentid
-
   },
     req.body.password, (err,user) => {
       console.log('ran');
@@ -35,7 +46,36 @@ router.post('/signup', (req, res, next) => {
       else{
         passport.authenticate('local')(req, res, () => {
           send_mail.send_mail(req.user.username,"Signed Up!","You have been succesfully signed up");
-            
+          
+          //shit starts here :
+
+          // console.log("1 : id=> ");
+          // console.log(req.user._id);
+          // console.log("2 : companylogo=> ");
+          // console.log(req.body.companylogo);
+          // req.companylogo = req.body.companylogo;
+          // companylogoUpload(req, res, function (err) {
+          //   if (err instanceof multer.MulterError) {
+          //       return res.status(500).json(err)
+          //   } else if (err) {
+          //       return res.status(500).json(err)
+          //   }
+          //   console.log("3 : reached");
+          //   return res.status(200).send(req.companylogo)
+          // })
+
+          // shit ends here
+
+
+
+
+
+
+
+
+
+
+
           res.statusCode = 200;
           res.setHeader('Content-Type','application/json');
           res.json({message : 'signup succesful'});

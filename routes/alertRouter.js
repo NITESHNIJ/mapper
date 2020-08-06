@@ -14,7 +14,7 @@ const alertRouter = express.Router();
 alertRouter.use(bodyParser.json());
 
 
-function eachInstance(instance,userid){
+function eachInstance(instance,username){
     var inst = {};
     inst.sensorinstid = instance._id;
     inst.checked = false;
@@ -22,9 +22,10 @@ function eachInstance(instance,userid){
     console.log("reached");
     var k;
     for(k=0;k<instance.alert_users.length;k++){
-        console.log("stored : " + instance.alert_users[k] + " == userid : "+ userid);
-        console.log("stored : " + typeof instance.alert_users[k] + " == userid : "+ typeof userid);
-        if( JSON.stringify(instance.alert_users[k]) === JSON.stringify(userid) ){
+        console.log("stored : " + instance.alert_users[k] + " == username : "+ username);
+        console.log("stored : " + typeof instance.alert_users[k] + " == username : "+ typeof username);
+        //if( JSON.stringify(instance.alert_users[k]) === JSON.stringify(userid) ){
+        if( instance.alert_users[k] === username ){
             console.log("matched");
             inst.checked = true;
         }
@@ -48,7 +49,7 @@ function eachInstance(instance,userid){
     
 }
 
-async function eachLocation(location,userid){
+async function eachLocation(location,username){
     var loc = {};
     loc.name = location.name;
     loc.latitude = location.latitude;
@@ -62,7 +63,7 @@ async function eachLocation(location,userid){
         var instance = {};
         var j;
         for(j=0;j<instances.length;j++){
-            instance = await eachInstance(instances[j],userid);
+            instance = await eachInstance(instances[j],username);
             loc.sensinst.push(instance);
         }
         return loc;
@@ -96,7 +97,7 @@ alertRouter.route('/')
             var global = [];
             for(i=0;i<locations.length;i++){
                 var local = {};
-                local = await eachLocation(locations[i],req.user._id);
+                local = await eachLocation(locations[i],req.user.username);
                 global.push(local);
             }
             res.statusCode = 200;
@@ -124,7 +125,7 @@ alertRouter.route('/')
                 _id: check[i]
             })
             .then((instance) => {
-                var id = req.user._id;
+                var id = req.user.username;
                 instance.alert_users.push(id);
                 instance.save()
                 .then((instance)=>{

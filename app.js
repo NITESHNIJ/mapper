@@ -7,6 +7,7 @@ var logger = require('morgan');
 
 var cors = require('cors');
 
+
 var session = require('express-session');
 var FileStore = require('session-file-store')(session);
 
@@ -42,6 +43,8 @@ connect.then((db) => {
 
 
 var app = express();
+
+var multer = require('multer');
 
 app.engine('html',require('ejs').renderFile);
 app.set('view engine', 'ejs'); 
