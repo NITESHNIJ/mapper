@@ -14,16 +14,15 @@ var router = express.Router();
 
 router.use(bodyParser.json());
 
-var companylogoStorage = multer.diskStorage({
+var userPicStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/images/companylogo')
+    cb(null, 'public/images/userpic')
   },
   filename: function (req, file, cb) {
     cb(null, 'anything_for_now' )
   }
 });
-var companylogoUpload = multer({ storage: companylogoStorage }).single('companylogo');
-
+var userPicUpload = multer({ storage: userPicStorage }).single('userPic');
 
 /* GET users listing. */
 
@@ -47,8 +46,10 @@ router.post('/signup', (req, res, next) => {
         passport.authenticate('local')(req, res, () => {
           send_mail.send_mail(req.user.username,"Signed Up!","You have been succesfully signed up");
           res.statusCode = 200;
+          console.log("req.user.userpic");
+          console.log(req.user.userpic);
           res.setHeader('Content-Type','application/json');
-          res.json({message : 'signup succesful'});
+          res.json({message : 'signup succesful', userpic:"req.user.userpic"});
         });
       }
   });

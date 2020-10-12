@@ -24,7 +24,7 @@ var User = new Schema({
         type: String
     },
     userpic: {
-        type: String
+        type: Object
     }
 });
 

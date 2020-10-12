@@ -7,6 +7,9 @@ const locationSchema = new Schema({
         type: String,
         required: true
     },
+    mapid: {
+        type: String
+    },
     latitude: {
         type: String,
         required: true

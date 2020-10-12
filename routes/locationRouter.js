@@ -17,6 +17,7 @@ locationRouter.route('/')
         req.body.userid = req.user._id;
         Location.create({
             userid: req.user._id,
+            mapid: req.body.mapid,
             latitude: req.body.latitude,
             longitude: req.body.longitude,
             name: req.body.name,
