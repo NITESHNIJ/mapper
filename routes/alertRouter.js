@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const Location = require('../models/location');
 const SensorInst = require('../models/sensor_instance');
 const Sensor = require('../models/sensor');
+const Maps = require('../models/custom_map');
 var passport = require('passport');
 
 const alertRouter = express.Router();
@@ -49,9 +50,26 @@ function eachInstance(instance,username){
     
 }
 
+
+function loc_name(mapid){
+    return Maps.find({_id : mapid})
+    .then((map) => {
+        return map[0].name;
+    },(err) => {
+        return 'no name found';
+    })
+    .catch((err) => {
+        return 'no name found';
+    });
+}
+
 async function eachLocation(location,username){
     var loc = {};
     loc.name = location.name;
+    if(location['mapid'] == 'global')
+        loc.map_name = "global";
+    else
+        loc['map_name'] = await loc_name(location['mapid']);
     loc.latitude = location.latitude;
     loc.longitude = location.longitude;
     loc.sensinst = [];

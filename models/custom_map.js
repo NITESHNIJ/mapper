@@ -4,18 +4,17 @@ const multer=require('multer');
 const PATH=path.join('/uploads/maps/');
 
 const custom_mapSchema=new mongoose.Schema({
-    name:{
-        type:String,
-    },
-    path:{
-        type:String
-    },
-    userid:{
-      type:mongoose.Schema.Types.ObjectId,
-      ref:'User',
-      required:true
+  name:{
+      type:String,
+  },
+  path:{
+      type:String
+  },
+  userid:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'User',
+    required:true
   }
-
 });
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
