@@ -81,6 +81,9 @@ app.use('/location',locationRouter);
 app.use('/sensor',sensorRouter);
 app.use('/sensorinst',sensorinstRouter);
 app.use('/code',codeRouter);
+//changes
+app.use('/custommap',require('./routes/custommapRouter'));
+
 
 app.use(express.static(path.join(__dirname, 'public')));
 
