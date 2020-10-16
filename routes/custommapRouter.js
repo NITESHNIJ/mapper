@@ -32,7 +32,31 @@ custom_Map.upload(req,res,async (err)=>{
     return res.status(200).json({"message":"map created succesfully"});
 })
 //return res.json('success');
-})
+});
+
+router.get('/',authenticate.verifyUser, (req,res,next) => {
+        var userid;
+        if(req.user.usertype == 'admin')
+            userid = req.user._id;
+        else
+            userid = req.user.parentid;
+        
+        custom_Map.find({
+            userid: userid
+        })
+        .then((maps) => {
+            res.statusCode = 200;
+            res.setHeader('Content-Type','application/json');
+            res.json({data:maps});
+        },
+        (error) => {
+            res.status(404).send(error);
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        });
+
+    });
 
 
 

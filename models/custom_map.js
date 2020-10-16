@@ -3,6 +3,7 @@ const path=require('path');
 const multer=require('multer');
 const PATH=path.join('/uploads/maps/');
 
+
 const custom_mapSchema=new mongoose.Schema({
   name:{
       type:String,

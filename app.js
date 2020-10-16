@@ -84,6 +84,7 @@ app.use('/code',codeRouter);
 //changes
 app.use('/custommap',require('./routes/custommapRouter'));
 
+app.use('/uploads',express.static('./uploads'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
