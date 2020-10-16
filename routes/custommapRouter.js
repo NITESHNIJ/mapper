@@ -57,6 +57,23 @@ router.get('/',authenticate.verifyUser, (req,res,next) => {
         });
 
     });
+    router.get('/getmap/:id',authenticate.verifyUser,async (req,res) => {
+        
+        console.log('here',req.params.id);
+        let id=req.params.id;
+        try{
+        let data=await custom_Map.findById(id);
+        if(data)
+        {
+            return res.json({map:data});
+        }
+        }
+        catch(err){
+            console.log(err);
+            return res.json({error:'Some Error Occured'})
+        }
+
+    });
 
 
 
