@@ -21,25 +21,6 @@ router.post('/',(req, res, next) => {
         console.log(point);
         if(point.length){
             if(point[0].username == req.body.username){
-                // User.find({username: req.body.username})
-                // .then((user) => {
-                //     // console.log(user.password);
-                //     // res.setHeader('Content-Type','application/json');
-                //     // res.statusCode = 200;
-                //     // res.json({message : 'found'});
-                // },error => {
-                //     res.setHeader('Content-Type','application/json');
-                //     res.status(401).send(error);
-                // })
-                // .catch(error => {
-                //     res.setHeader('Content-Type','application/json');
-                //     res.status(401).send(error);
-                // })
-
-                // console.log(point[0].hash);
-                // res.setHeader('Content-Type','application/json');
-                // res.statusCode = 200;
-                // res.json({message : 'found'});
                 User.findByUsername(req.body.username).then(function(sanitizedUser){
                     if (sanitizedUser){
                         sanitizedUser.setPassword(req.body.password, function(){
